@@ -14,17 +14,17 @@ backup_dir.mkdir(parents=True, exist_ok=True)
 # Ensure the source directory exists
 source_dir = Path("/home")
 if not source_dir.exists():
-    print(f"Source directory {source_dir} does not exist.")
+    print(f"Directory {source_dir} does not exist.")
     exit(1)
 
-# Create a backup of the source directory
+# Create a backup of the source directory and compress using tar
 
 folder_name = source_dir.name
 today_str = datetime.now().strftime("%Y-%m-%d")
 
 backup_filename = f"{folder_name}_{today_str}.tar.gz"
 backup_path = backup_dir / backup_filename
-backup_command = f"/bin/tar -czf {backup_path} -C {source_dir} ."
+backup_command = f"/bin/tar -czf {backup_path} -C {source_dir} ." #There was a problem with the tar command (Required the full path to tar).
 
 
 os.system(backup_command)
@@ -39,8 +39,7 @@ for file in backup_dir.glob(f"{folder_name}_*.tar.gz"):
     try:
         file_date = datetime.strptime(file_date_str, "%Y-%m-%d")
         if file_date < cutoff_date:
-            file.unlink()
+            file.unlink() # delete old file
             print(f"Deleted old backup: {file}")
     except ValueError:
-        # Skip files that don't match date format
         continue
