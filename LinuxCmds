@@ -1,0 +1,115 @@
+###System monitoring###
+
+htop                                    # Interactive process viewer
+ps aux                                  # List processes
+top                                     # Real-time process monitoring
+du -sh * | sort -hr                     # Disk usage, sorted
+df -h                                   # Disk space usage
+lsblk                                   # List block devices
+ip a                                    # Show network interfaces
+hostname                                # Show hostname
+uname -a                                # Kernel & system info
+free -h                                 # RAM usage
+uptime                                  # System uptime
+
+### Mount filesystems###
+
+# View mounted filesystems
+mount | grep nvme1n1
+df -h | grep nvme1n1
+
+# Format a disk
+sudo mkfs.ext4 /dev/nvme1n1
+sudo mkdir -p /mnt/data
+sudo mount /dev/nvme1n1 /mnt/data
+
+# Auto-mount on boot
+sudo blkid /dev/nvme1n1       # Find UUID
+sudo nano /etc/fstab          # Add entry: UUID=xxxx /mnt/data ext4 defaults,nofail 0 2
+echo "UUID=xxxx /mnt/data ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
+
+
+# Add user to docker group
+sudo usermod -aG docker ec2-user
+groups
+
+###Create group with RWX permissions###
+sudo groupadd test
+sudo usermod -aG test ubuntu
+sudo chown root:test /mnt/extra-volume
+sudo chmod 770 /mnt/extra-volume
+groups
+
+###Check service###
+sudo service ssh status
+sudo service ssh start
+sudo service ssh stop
+
+htop                                   # Interactive process viewer
+ps -ef | grep processname              # Find a process
+kill -9 PID                            # Kill a process
+systemctl list-units --type=service    # List running services
+systemctl status service_name          # Check service status
+systemctl restart service_name         # Restart service
+
+###Build from source###
+
+git clone https://github.com/lh3/minimap2.git
+cd minimap2
+make
+
+docker build -t minimap2:latest .
+
+
+###Push to Docker & AWS ECR###
+
+aws ecr get-login-password --region eu-north-1 | \
+  docker login --username AWS --password-stdin xxxxxxx.dkr.ecr.eu-north-1.amazonaws.com
+
+docker tag seqtk:2.0 xxxxxxxx.dkr.ecr.eu-north-1.amazonaws.com/seqtk:2.0
+docker push xxxxxxxxx.dkr.ecr.eu-north-1.amazonaws.com/seqtk:2.0
+
+###Cron jobs###
+
+crontab -e                               # Edit cron jobs
+0 2 * * * /usr/bin/python3 /path/to/script.py >> /var/log/backup/backup.log 2>&1
+crontab -l                               # List cron jobs
+grep CRON /var/log/syslog                # Check cron logs
+
+
+###GitHub setup###
+
+# Config
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+
+# Create SSH Key for GitHub
+ssh-keygen -t ed25519 -C "your@email.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub
+ssh -T git@github.com
+
+# Common Git Commands
+git init
+git add .
+git commit -m "Commit"
+git remote add origin git@github.com:user/repo.git
+git pull origin main --allow-unrelated-histories
+git push -u origin main
+git push -u origin main --force
+
+
+### Usefull cmds ###
+tar -czvf archive.tar.gz folder/         # Create tar.gz
+tar -xzvf archive.tar.gz                 # Extract tar.gz
+rsync -avh src/ dest/                     # Sync folders
+scp file.txt user@server:/path/           # Copy to remote
+grep "pattern" file.txt                   # Search text
+find /path -name "*.txt"                  # Find files
+history | grep something                  # Search command history
+
+
+
+
+
